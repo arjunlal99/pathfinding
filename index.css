@@ -1,0 +1,20 @@
+:root {
+    --grid-cols: 1;
+    --grid-rows :1;
+}
+
+#selected-cell{
+    background-color: aqua;
+}
+
+.grid-item{
+    background-color: violet;
+    border: 1px solid whitesmoke;
+    padding: 5px;
+}
+#grid-container {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-cols), 30px);
+    grid-template-rows: repeat(var(--grid-rows), 30px);
+}
+
