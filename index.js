@@ -1,12 +1,17 @@
-//import {BFS} from 'bfs.js'
+/*
+    Color constants
+*/
+const path_color = "#ff0040"
+const endpoints_color = "#005540"
+const visited_color = "#00ff8c"
 
 let gridSize = {rows: 30, columns: 30}
 const container = document.getElementById('grid-container');
 
 function cellClick(cell){
-    cell.id = "selected-cell"
+    //cell.id = "selected-cell"
     console.log(cell.coordinates)
-    BFS(cell.coordinates.x,cell.coordinates.y)
+    //BFS(cell.coordinates.x,cell.coordinates.y)
    // getCellByCoordinates(cell.coordinates.x,cell.coordinates.y)
     //getCellByCoordinates(cell.coordinates.x+1, cell.coordinates.y+1).style.backgroundColor = "blue"
     //horizontal(cell.coordinates.x,cell.coordinates.y+1)
@@ -22,7 +27,7 @@ function getCellByCoordinates(x,y){
     return grid[ ( x * gridSize.columns ) + y]
 }
 
-function changeColor(x,y,color = "green"){
+function changeColor(x,y,color = "red"){
     getCellByCoordinates(x,y).style.backgroundColor = color
 }
 
@@ -90,6 +95,17 @@ class ColorQueue{
         this.t += 50
     }
 
+    pushBack(x,y,color,revert_color){
+        this.queue.push({x:x,y:y})
+        setTimeout(() => {
+            let coordinates = this.pop()
+            this.changeColor(coordinates.x,coordinates.y,color)
+            setTimeout(() => {
+                this.changeColor(coordinates.x,coordinates.y,revert_color)
+            },this.t)
+        },this.t)
+        this.t += 50
+    }
     pop(){
         return this.queue.shift()
     }
@@ -187,8 +203,8 @@ class Graph{
 }
 
 function BFS(x,y,x2,y2){
-    changeColor(x,y,"green")
-    changeColor(x2,y2,"blue")
+    changeColor(x,y,endpoints_color)
+    changeColor(x2,y2,endpoints_color)
     let cq = new ColorQueue()
     let graph = new Graph(gridSize.rows, gridSize.columns)
     let end = graph.getVertexByCoordinates(x2,y2)
@@ -207,35 +223,33 @@ function BFS(x,y,x2,y2){
     while(queue.length != 0){
         let vertex = queue.shift()
         let coordinates = graph.getCoordinatesByIndex(vertex)
-        //cq.push(coordinates.x,coordinates.y,"yellow")
+        //cq.pushBack(coordinates.x,coordinates.y,"#00ffbf", visited_color)
         for (const n of graph.getNeighbors(coordinates.x, coordinates.y)){
             if (!visited.includes(n)){
+                
                 if (n == end){
                     pred[n] = vertex
                     dist[n] = vertex + 1
                     //return pred
                     let path = []
-                    let i = n
+                    let i = pred[n]
                     while(i != graph.getVertexByCoordinates(x,y)){
                         path.push(pred[i])
                         let coordinates = graph.getCoordinatesByIndex(i)
-                        cq.push(coordinates.x,coordinates.y,"black")
+                        cq.push(coordinates.x,coordinates.y,path_color)
                         i=pred[i]
                     }
                     return path
-                } 
+                }
+                let coordinates = graph.getCoordinatesByIndex(n)
+                cq.push(coordinates.x,coordinates.y,visited_color) 
                 queue.push(n)
                 dist[n] = vertex + 1
                 pred[n] = vertex
                 visited.push(n)
-                console.log(n)
-                let coordinates = graph.getCoordinatesByIndex(n)
-                /*
-                setInterval(() => {
-                    changeColor(coordinates.x,coordinates.y)
-                },1000)
-                */
-                cq.push(coordinates.x,coordinates.y,"red")
+                //console.log(n)
+
+                
             }
         }
         
