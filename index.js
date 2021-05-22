@@ -1,7 +1,7 @@
 /*
     Color constants
 */
-const path_color = "#ff0040"
+const path_color = "#ff6961"
 const endpoints_color = "#005540"
 const visited_color = "#00ff8c"
 
@@ -16,6 +16,8 @@ function cellClick(cell){
     //getCellByCoordinates(cell.coordinates.x+1, cell.coordinates.y+1).style.backgroundColor = "blue"
     //horizontal(cell.coordinates.x,cell.coordinates.y+1)
     //vertical(cell.coordinates.x+1, cell.coordinates.y)
+    graph.wallVertex(cell.coordinates.x,cell.coordinates.y)
+    getCellByCoordinates(cell.coordinates.x, cell.coordinates.y).style.backgroundColor = "black"
     return cell.coordinates
 }
 
@@ -162,7 +164,7 @@ class Graph{
         }
 
         
-        console.log(this.adjList)
+        //console.log(this.adjList)
 
     }
     
@@ -178,11 +180,44 @@ class Graph{
         this.adjList[( x1 * gridSize.columns ) + y1].push( ( x2 * gridSize.columns ) + y2)
     }
 
+    removeEdge(x1,y1,x2,y2){
+        /*
+            Remove (x2,y2) from adjList of (x1,y1)
+        */
+        let v1 = this.getVertexByCoordinates(x1,y1)
+        let v2 = this.getVertexByCoordinates(x2,y2)
+
+        let index = this.adjList[v1].indexOf(v2)
+        this.adjList[v1].splice(index,1)
+        return {x:x2,y:y2}
+    }
+
+    removeEdgeByIndex(v1,v2){
+        let index = this.adjList[v1].indexOf(v2)
+        this.adjList[v1].splice(index,1)
+        return v2
+    }
+
     getNeighbors(x,y){
         /*
             Get neighboring vertices of (x,y)
         */
        return this.adjList[( x * gridSize.columns ) + y]
+    }
+
+    getNeighborsByIndex(v){
+        return this.adjList[v]
+    }
+
+    wallVertex(x,y){
+        /*
+            Convert a vertex into a wall (Remove all edges to vertex(x,y))
+        */
+        let neighbors = this.getNeighbors(x,y)
+        let index = this.getVertexByCoordinates(x,y)
+        for (const v of neighbors){
+            this.removeEdgeByIndex(v,index)
+        }
     }
 
     neighborColorChange(x,y){
@@ -202,11 +237,13 @@ class Graph{
 
 }
 
+let graph = new Graph(gridSize.rows, gridSize.columns)
+
 function BFS(x,y,x2,y2){
     changeColor(x,y,endpoints_color)
     changeColor(x2,y2,endpoints_color)
     let cq = new ColorQueue()
-    let graph = new Graph(gridSize.rows, gridSize.columns)
+    
     let end = graph.getVertexByCoordinates(x2,y2)
     let queue = []
     let visited = []
